@@ -26,7 +26,7 @@ def parse_notebook(filename):
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
-        sys.stderr.write("Usage: %s <notebook_file.csv>" % sys.argv[0])
+        sys.stderr.write("Usage: %s <notebook_file.csv>\n" % sys.argv[0])
         sys.exit(1)
 
     filename = sys.argv[1]
