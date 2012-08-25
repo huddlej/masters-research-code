@@ -27,6 +27,7 @@ def parse_notebook(filename):
     pprint.pprint(counts)
     return ids
 
+
 def parse_experiments(filename, ids=None):
     """
     Read in actions from an experiments file, group them by experiment id, and
