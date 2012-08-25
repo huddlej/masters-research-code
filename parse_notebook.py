@@ -4,6 +4,7 @@
 Parse notebook
 """
 import csv
+import datetime
 import pprint
 import sys
 
@@ -36,13 +37,26 @@ def parse_experiments(filename, ids=None):
     If ``ids`` is specified, only parse actions for experiments with an id in
     this list.
     """
+    format = "%Y-%m-%d %H:%M:%S"
     fh = open(filename, "r")
     reader = csv.reader(fh, delimiter="\t")
 
     experiments = {}
+    start = None
+    previous_experiment = None
     for row in reader:
         if ids is None or row[0] in ids:
-            experiments.setdefault(int(row[0]), []).append(row)
+            action_timestamp = datetime.datetime.strptime(row[2].split(".")[0], format)
+
+            if previous_experiment != row[0]:
+                start = action_timestamp
+            else:
+                delta = action_timestamp - start
+                relative_timestamp = delta.seconds
+                experiments.setdefault(int(row[0]), []).append((row[1], relative_timestamp))
+
+
+            previous_experiment = row[0]
 
     return experiments
 
