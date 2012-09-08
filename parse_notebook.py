@@ -73,9 +73,39 @@ if __name__ == "__main__":
         sys.exit(1)
 
     notebook_filename = sys.argv[1]
-    ids = parse_notebook(notebook_filename)
 
     if len(sys.argv) > 2:
-        experiments_filename = sys.argv[2]
-        experiments = parse_experiments(experiments_filename, ids)
-        pprint.pprint(experiments)
+        experiments = parse_experiments(notebook_filename)
+        actions_filename = sys.argv[2]
+        all_actions = parse_actions(actions_filename, experiments)
+        #pprint.pprint(actions)
+
+        print "\t".join(("experiment_id", "species", "sex", "time_on_wall", "time_on_apple", "time_on_snowberry"))
+        for experiment_id, actions in all_actions.items():
+            times = {}
+            first_wall_found = False
+
+            for action in actions:
+                if action[0].startswith("wall"):
+                    if first_wall_found:
+                        times["wall"] = times.get("wall", 0) + action[1]
+                    else:
+                        first_wall_found = True
+                elif action[0].startswith("apple"):
+                    times["apple"] = times.get("apple", 0) + action[1]
+                elif action[0].startswith("snowberry"):
+                    times["snowberry"] = times.get("snowberry", 0) + action[1]
+
+            print "\t".join((
+                experiment_id,
+                experiments[experiment_id].get("Species", "?"),
+                experiments[experiment_id].get("Sex", "?"),
+                str(times.get("wall", 0)),
+                str(times.get("apple", 0)),
+                str(times.get("snowberry", 0))
+            ))
+    else:
+        print "Cooperative"
+        experiments = parse_experiments(notebook_filename, print_counts=True)
+        print "Uncooperative"
+        experiments = parse_experiments(notebook_filename, uncooperative="Y", print_counts=True)
