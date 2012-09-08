@@ -9,7 +9,7 @@ import pprint
 import sys
 
 
-def parse_notebook(filename):
+def parse_experiments(filename, uncooperative="N", print_counts=False):
     """
     Read in a lab notebook from a CSV file and write out a parsed version of it.
     """
@@ -17,16 +17,19 @@ def parse_notebook(filename):
     reader = csv.DictReader(fh)
 
     counts = {}
-    ids = []
+    experiments = {}
     for row in reader:
-        if row["Uncooperative"] != "Y":
+        if row["Uncooperative"] == uncooperative:
             key = "%s%s" % (row["Species"], row["Sex"])
             counts[key] = counts.get(key, 0) + 1
-            ids.append(row["Id"])
+            experiments[row["Id"]] = row
 
     fh.close()
-    pprint.pprint(counts)
-    return ids
+
+    if print_counts:
+        pprint.pprint(counts)
+
+    return experiments
 
 
 def parse_experiments(filename, ids=None):
