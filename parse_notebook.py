@@ -32,36 +32,37 @@ def parse_experiments(filename, uncooperative="N", print_counts=False):
     return experiments
 
 
-def parse_experiments(filename, ids=None):
+def parse_actions(filename, experiments=None):
     """
     Read in actions from an experiments file, group them by experiment id, and
     convert absolute time to relative time.
 
-    If ``ids`` is specified, only parse actions for experiments with an id in
-    this list.
+    If ``experiments`` dictionary is specified, only parse actions for
+    experiments with an "Id" in this list.
     """
     format = "%Y-%m-%d %H:%M:%S"
     fh = open(filename, "r")
     reader = csv.reader(fh, delimiter="\t")
 
-    experiments = {}
+    actions = {}
     start = None
-    previous_experiment = None
+    previous_timestamp = 0
+    previous_row = None
     for row in reader:
-        if ids is None or row[0] in ids:
+        if experiments is None or row[0] in experiments:
             action_timestamp = datetime.datetime.strptime(row[2].split(".")[0], format)
 
-            if previous_experiment != row[0]:
+            if previous_row is None or previous_row[0] != row[0]:
                 start = action_timestamp
             else:
-                delta = action_timestamp - start
+                delta = action_timestamp - previous_timestamp
                 relative_timestamp = delta.seconds
-                experiments.setdefault(int(row[0]), []).append((row[1], relative_timestamp))
+                actions.setdefault(previous_row[0], []).append((previous_row[1], relative_timestamp))
 
+            previous_row = row
+            previous_timestamp = action_timestamp
 
-            previous_experiment = row[0]
-
-    return experiments
+    return actions
 
     fh.close()
 
