@@ -79,7 +79,24 @@ if __name__ == "__main__":
         actions_filename = sys.argv[2]
         all_actions = parse_actions(actions_filename, experiments)
 
-        print "\t".join(("experiment_id", "species", "sex", "time_on_wall", "time_on_apple", "time_on_snowberry"))
+        experiment_fields = (
+            "Id",
+            "Date",
+            "Species",
+            "Sex",
+            "Previously uncooperative",
+            "Searched snowberry",
+            "Searched apple",
+            "Fed on apple",
+            "Temperature (C)"
+        )
+        action_states = ("wall", "apple", "apple_search", "apple_rest",
+                         "snowberry", "snowberry_search", "snowberry_rest")
+
+        print "\t".join(("experiment_id", "date", "species", "sex",
+                         "previously_uncooperative", "searched_snowberry",
+                         "searched_apple", "fed_on_apple", "temperature",
+                         "time_on_wall", "time_on_apple", "time_on_snowberry"))
         for experiment_id, actions in all_actions.items():
             times = {}
             first_wall_found = False
