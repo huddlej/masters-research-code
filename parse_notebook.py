@@ -112,19 +112,19 @@ if __name__ == "__main__":
                         times["wall"] = times.get("wall", 0) + action[1]
                     else:
                         first_wall_found = True
-                elif action[0].startswith("apple"):
-                    times["apple"] = times.get("apple", 0) + action[1]
-                elif action[0].startswith("snowberry"):
-                    times["snowberry"] = times.get("snowberry", 0) + action[1]
+                elif action[0].startswith(("apple", "snowberry")):
+                    # Split times for fruit into rest and search.
+                    times[action[0]] = times.get(action[0], 0) + action[1]
 
-            print "\t".join((
-                experiment_id,
-                experiments[experiment_id].get("Species", "?"),
-                experiments[experiment_id].get("Sex", "?"),
-                str(times.get("wall", 0)),
-                str(times.get("apple", 0)),
-                str(times.get("snowberry", 0))
-            ))
+                    # Count totla time for the fruit.
+                    fruit = action[0].split("_")[0]
+                    times[fruit] = times.get(fruit, 0) + action[1]
+                else:
+                    pass
+
+            experiment = experiments[experiment_id]
+            print "\t".join([experiment.get(field, "?") for field in experiment_fields] +
+                            [str(times.get(state, 0)) for state in action_states])
     else:
         print "Cooperative"
         experiments = parse_experiments(notebook_filename, print_counts=True)
