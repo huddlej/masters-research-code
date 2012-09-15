@@ -78,7 +78,6 @@ if __name__ == "__main__":
         experiments = parse_experiments(notebook_filename)
         actions_filename = sys.argv[2]
         all_actions = parse_actions(actions_filename, experiments)
-        #pprint.pprint(actions)
 
         print "\t".join(("experiment_id", "species", "sex", "time_on_wall", "time_on_apple", "time_on_snowberry"))
         for experiment_id, actions in all_actions.items():
