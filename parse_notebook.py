@@ -84,6 +84,11 @@ if __name__ == "__main__":
             times = {}
             first_wall_found = False
 
+            # Remove the last wall instance which really marks the "end" of the
+            # experiment.
+            if len(actions) > 0 and actions[-1][0] == "wall":
+                actions.pop()
+
             for action in actions:
                 if action[0].startswith("wall"):
                     if first_wall_found:
