@@ -98,19 +98,22 @@ if __name__ == "__main__":
 
         for experiment_id, actions in all_actions.items():
             times = {}
-            first_wall_found = False
 
             # Remove the last wall instance which really marks the "end" of the
             # experiment.
             if len(actions) > 0 and actions[-1][0] == "wall":
                 actions.pop()
 
+            # Throw out start and first wall if it exists.
+            if actions[0][0] == "start":
+                actions.pop(0)
+
+            if actions[0][0] == "wall":
+                actions.pop(0)
+
             for action in actions:
                 if action[0].startswith("wall"):
-                    if first_wall_found:
-                        times["wall"] = times.get("wall", 0) + action[1]
-                    else:
-                        first_wall_found = True
+                    times["wall"] = times.get("wall", 0) + action[1]
                 elif action[0].startswith(("apple", "snowberry")):
                     # Split times for fruit into rest and search.
                     times[action[0]] = times.get(action[0], 0) + action[1]
