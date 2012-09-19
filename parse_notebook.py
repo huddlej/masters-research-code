@@ -93,10 +93,9 @@ if __name__ == "__main__":
         action_states = ("wall", "apple", "apple_search", "apple_rest",
                          "snowberry", "snowberry_search", "snowberry_rest")
 
-        print "\t".join(("experiment_id", "date", "species", "sex",
-                         "previously_uncooperative", "searched_snowberry",
-                         "searched_apple", "fed_on_apple", "temperature",
-                         "time_on_wall", "time_on_apple", "time_on_snowberry"))
+        print "\t".join(tuple([field.lower().replace(" ", "_")
+                               for field in experiment_fields]) + action_states)
+
         for experiment_id, actions in all_actions.items():
             times = {}
             first_wall_found = False
