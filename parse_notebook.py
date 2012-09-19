@@ -69,12 +69,28 @@ def parse_actions(filename, experiments=None):
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
-        sys.stderr.write("Usage: %s <notebook_file.csv> [experiments_file.tab]\n" % sys.argv[0])
+        sys.stderr.write("Usage: %s <notebook_file.csv> [experiments_file.tab] [parsed_actions.tab]\n" % sys.argv[0])
         sys.exit(1)
 
     notebook_filename = sys.argv[1]
 
-    if len(sys.argv) > 2:
+    if len(sys.argv) == 4:
+        experiments = parse_experiments(notebook_filename)
+        actions_filename = sys.argv[2]
+        parsed_actions_filename = sys.argv[3]
+        all_actions = parse_actions(actions_filename, experiments)
+
+        # Write out parsed actions to a file.
+        oh = open(parsed_actions_filename, "w")
+
+        for experiment, actions in all_actions.items():
+            for action in actions:
+                oh.write("%s\n" % "\t".join(
+                    (str(experiment), action[0], str(action[1])))
+                )
+
+        oh.close()
+    elif len(sys.argv) == 3:
         experiments = parse_experiments(notebook_filename)
         actions_filename = sys.argv[2]
         all_actions = parse_actions(actions_filename, experiments)
