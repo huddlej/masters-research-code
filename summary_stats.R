@@ -1,6 +1,52 @@
 # Load libraries.
 library(ggplot2)
 
+# Define functions.
+total.time.distribution <- function (data) {
+    return(boxplot(data[,c("apple", "snowberry", "wall")],
+                   ylab="Total time spent on location (seconds)",
+                   xlab="Location"))
+}
+
+behavior.time.distribution <- function (data) {
+    return(boxplot(data[,c("apple.search", "snowberry.search", "apple.rest", "snowberry.rest")],
+                   ylab="Behavior time spent on location (seconds)",
+                   xlab="Location/Behavior"))
+}
+
+calculate.means <- function (data) {
+    return(c(mean(data$apple), mean(data$snowberry), mean(data$wall)))
+}
+
+calculate.stddevs <- function (data) {
+    return(c(sd(data$apple), sd(data$snowberry), sd(data$wall)))
+}
+
+count.fruit.searches <- function (data) {
+    return(c(
+        sum(data$searched.apple=="N" & data$searched.snowberry=="N"),
+        sum(data$searched.apple=="Y" & data$searched.snowberry=="N"),
+        sum(data$searched.apple=="N" & data$searched.snowberry=="Y"),
+        sum(data$searched.apple=="Y" & data$searched.snowberry=="Y")
+    ))
+}
+
+count.apple.feeders <- function (data) {
+    females.fed.on.apple <- sum(data$sex=="F" & data$fed.on.apple=="Y")
+    males.fed.on.apple <- sum(data$sex=="M" & data$fed.on.apple=="Y")
+
+    return(list(
+        female=females.fed.on.apple,
+        male=males.fed.on.apple,
+        proportion.female=(females.fed.on.apple / sum(data$sex=="F")),
+        proportion.male=(males.fed.on.apple / sum(data$sex=="M"))
+    ))
+}
+
+plot.logFC <- function (data) {
+    return(ggplot(data, aes(x=logFC.total.time, fill=sex)))
+}
+
 # Load initial data.
 data <- read.table("final_data.tab", header=T)
 
