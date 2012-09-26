@@ -51,66 +51,61 @@ plot.logFC <- function (data) {
 data <- read.table("final_data.tab", header=T)
 
 # Prepare calculated columns.
-data <- data.frame(data, total_time=data$apple+data$snowberry+data$wall)
+data <- data.frame(data, total.time=data$apple+data$snowberry+data$wall)
 data <- data.frame(
     data,
-    apple_proportion=data$apple/data$total_time,
-    snowberry_proportion=data$snowberry/data$total_time,
-    wall_proportion=data$wall/data$total_time
+    apple.proportion=data$apple/data$total.time,
+    snowberry.proportion=data$snowberry/data$total.time,
+    wall.proportion=data$wall/data$total.time,
+    logFC.total.time=log((data$apple + 1) / (data$snowberry + 1))
 )
 
 # Get rows for R. zephyria only.
-rz_data <- data[data$species=="Z",]
+rz.data <- data[data$species=="Z",]
 
 # Plot distributions of time spent on different locations.
-png("distribution_location_total_time.png", height=400, width=400)
-boxplot(rz_data[,c("apple", "snowberry", "wall")], ylab="Total time spent on location (seconds)", xlab="Location")
+png("figures/distribution_location_total_time.png", height=400, width=400)
+total.time.distribution(rz.data)
 dev.off()
 
-png("distribution_location_behavior_time.png", height=600, width=600)
-boxplot(rz_data[,c("apple_search", "snowberry_search", "apple_rest", "snowberry_rest")],
-        ylab="Behavior time spent on location (seconds)", xlab="Location/Behavior")
+png("figures/distribution_location_behavior_time.png", height=600, width=600)
+behavior.time.distribution(rz.data)
 dev.off()
 
 # Plot means and standard deviations.
 locations <- c("apple", "snowberry", "wall")
-means <- c(mean(rz_data$apple), mean(rz_data$snowberry), mean(rz_data$wall))
-sds <- c(sd(rz_data$apple), sd(rz_data$snowberry), sd(rz_data$wall))
+means <- calculate.means(rz.data)
+sds <- calculate.stddevs(rz.data)
+times <- data.frame(location=locations, mean=means, sd=sds)
 
+png("figures/barplot_location_total_time.png", height=500, width=500)
 se <- ggplot(times, aes(locations, means, ymin=means-sds, ymax=means+sds, colour=locations))
-
-png("barplot_location_total_time.png", height=500, width=500)
 se + geom_pointrange()
 dev.off()
 
 # Only count means and std devs for individuals that didn't feed off apple.
-rz_nofed_data <- rz_data[rz_data$fed_on_apple=="N",]
-locations <- c("apple", "snowberry", "wall")
-means <- c(mean(rz_nofed_data$apple), mean(rz_nofed_data$snowberry), mean(rz_nofed_data$wall))
-sds <- c(sd(rz_nofed_data$apple), sd(rz_nofed_data$snowberry), sd(rz_nofed_data$wall))
-se <- ggplot(times, aes(locations, means, ymin=means-sds, ymax=means+sds, colour=locations))
+means <- calculate.means(rz.data[rz.data$fed.on.apple=="N",])
+sds <- calculate.stddevs(rz.data[rz.data$fed.on.apple=="N",])
 
-png("barplot_location_total_time_without_apple_feeders.png", height=500, width=500)
+png("figures/barplot_location_total_time_without_apple_feeders.png", height=500, width=500)
+se <- ggplot(times, aes(locations, means, ymin=means-sds, ymax=means+sds, colour=locations))
 se + geom_pointrange()
 dev.off()
 
 # Count fruit searches.
-fruit_searches_names <- c("neither fruit", "apple only", "snowberry only", "both fruits")
-fruit_searches <- c(
-    sum(rz_data$searched_apple=="N" & rz_data$searched_snowberry=="N"),
-    sum(rz_data$searched_apple=="Y" & rz_data$searched_snowberry=="N"),
-    sum(rz_data$searched_apple=="N" & rz_data$searched_snowberry=="Y"),
-    sum(rz_data$searched_apple=="Y" & rz_data$searched_snowberry=="Y")
-)
-png("fruit_searches.png", height=500, width=500)
-qplot(fruit_searches_names, fruit_searches)
+fruit.searches.names <- c("neither fruit", "apple only", "snowberry only", "both fruits")
+fruit.searches <- count.fruit.searches(rz.data)
+
+png("figures/fruit_searches.png", height=500, width=500)
+qplot(fruit.searches.names, fruit.searches)
 dev.off()
 
 # Count individuals of either sex that fed off apple.
-females_fed_on_apple <- sum(rz_data$sex=="F" & rz_data$fed_on_apple=="Y")
-males_fed_on_apple <- sum(rz_data$sex=="M" & rz_data$fed_on_apple=="Y")
-proportion_females_fed_on_apple <- females_fed_on_apple / sum(rz_data$sex=="F")
-proportion_males_fed_on_apple <- males_fed_on_apple / sum(rz_data$sex=="M")
+apple.feeders <- count.apple.feeders(data)
+females.fed.on.apple <- apple.feeders$female
+males.fed.on.apple <- apple.feeders$male
+proportion.females.fed.on.apple <- apple.feeders$proportion.female
+proportion.males.fed.on.apple <- apple.feeders$proportion.male
 
 # Analysis of uncooperative flies.
 uncooperative.matrix <- matrix(
@@ -121,7 +116,16 @@ uncooperative.matrix <- matrix(
         c("cooperative", "uncooperative")
     )
 )
-png("cooperative_vs_uncooperative.png")
+png("figures/cooperative_vs_uncooperative.png")
 par(mar=c(5, 4, 2, 2) + 0.1)
 dotchart(uncooperative.matrix, xlab="Number of trials")
+dev.off()
+
+png("figures/distribution_of_total_time_logFC.png")
+qplot(data$logFC.total.time, geom="histogram", binwidth=0.5)
+dev.off()
+
+png("figures/distribution_of_total_time_logFC_by_sex.png")
+hist.time <- plot.logFC(rz.data)
+hist.time + geom_bar(position="dodge", binwidth=0.5)
 dev.off()
